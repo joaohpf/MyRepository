@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfólio — protótipo da queda na água</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:#05060d;color:#eaf6f8;font-family:'Space Grotesk',system-ui,sans-serif}
+  body{overflow-x:hidden}
+  a{color:#9ff5e6}
+
+  /* ---------- cena fixa (fundo animado) ---------- */
+  #scene{position:fixed;inset:0;overflow:hidden;z-index:0;background:#05060d}
+  #blurwrap{position:absolute;inset:0}
+  #neon{display:none}
+  #floor{display:none}
+  #char{position:absolute;left:0;top:0;transform-origin:51.71% 72.89%;will-change:transform;filter:drop-shadow(0 0 10px rgba(124,243,255,.28))}
+  #char img{position:absolute;inset:0;width:100%;height:100%;opacity:0;user-select:none;-webkit-user-drag:none}
+  #char img.on{opacity:1}
+  #fx{position:absolute;inset:0;z-index:2}
+  #rays{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;mix-blend-mode:screen}
+  .ray{position:absolute;top:0;width:9vw;min-width:50px;height:130vh;
+       background:linear-gradient(to bottom,rgba(170,255,235,.38),rgba(170,255,235,0) 75%);
+       filter:blur(10px);transform-origin:top center;animation:ray 7s ease-in-out infinite}
+  @keyframes ray{0%,100%{opacity:.35}50%{opacity:.9}}
+  #flash{position:absolute;inset:0;z-index:4;background:#e8fff9;opacity:0;pointer-events:none}
+
+  /* ---------- conteúdo que rola por cima ---------- */
+  main{position:relative;z-index:2}
+  /* seletor de idioma: dois quadradinhos colados, sem fundo nem borda; um bloco claro desliza para o lado ativo */
+  .lang{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;display:flex;gap:0}   /* no topo da página; some ao rolar; fundo transparente */
+  .lang .pill{position:absolute;left:0;top:0;width:38px;height:38px;background:rgba(255,255,255,.82);
+    transition:transform .45s cubic-bezier(.65,0,.35,1)}
+  .lang.pt .pill{transform:translateX(38px)}
+  .lang button{position:relative;z-index:1;width:38px;height:38px;border:0;border-radius:0;cursor:pointer;
+    background:none;color:rgba(255,255,255,.8);font:12px 'Silkscreen',monospace;transition:color .45s}
+  .lang button.on{color:#0a1430}
+  .bin{color:#16a34a}   /* dígitos do efeito binário */
+  .hero{height:100vh;padding:9vh 7vw 0;position:relative;text-align:right}
+  @font-face{font-family:'Silkscreen';src:url('fonts/silkscreen.woff2') format('woff2');font-display:swap}
+  /* letras em pixel (estilo da referência): branco com sombra cinza deslocada */
+  .hero .kicker,.hero h1,.hero p{font-family:'Silkscreen',monospace;color:#fff;text-transform:uppercase;text-shadow:.12em .12em 0 #2e302d}
+  .hero .kicker{font-size:16px;letter-spacing:.12em}
+  .hero h1{font-size:clamp(34px,6.5vw,80px);line-height:1;margin-top:10px;font-weight:400;letter-spacing:.04em}
+  .hero p{margin-top:14px;font-size:clamp(15px,1.8vw,22px);letter-spacing:.06em}
+  .hint{position:absolute;bottom:3.5vh;left:0;right:0;text-align:center;font-size:13px;color:#b9c9d6;letter-spacing:.15em;text-transform:uppercase}
+  .hint span{display:inline-block;animation:hint 1.6s ease-in-out infinite}
+  @keyframes hint{50%{transform:translateY(6px)}}
+
+  .dive{height:160vh;display:flex;align-items:flex-end;justify-content:center;padding-bottom:30vh}
+  .dive h2{font-size:clamp(30px,5.5vw,64px);text-align:center;line-height:1.05;text-shadow:0 4px 30px rgba(0,0,0,.4)}
+  .dive h2 small{display:block;font-size:.35em;font-weight:400;color:#c9f3ec;margin-top:12px;letter-spacing:.05em}
+
+  .projects{padding:4vh 3vw 10vh;max-width:none;margin:0}
+  .projects h3{font-size:clamp(26px,3.5vw,40px);margin-bottom:28px}
+  /* cards em zigue-zague: um à esquerda, o próximo mais abaixo à direita, e assim por diante */
+  .grid{display:flex;flex-direction:column;gap:12vh}
+  .grid .card{width:min(380px,82vw)}
+  .grid .card:nth-child(odd){align-self:flex-start}
+  .grid .card:nth-child(even){align-self:flex-end}
+  /* projeto no estilo do exemplo: imagem de um lado, texto do outro, descrição numa caixa com fundo desfocado */
+  @font-face{font-family:'Poppins Local';src:url('fonts/poppins-400.woff2') format('woff2');font-weight:400;font-display:swap}
+  @font-face{font-family:'Poppins Local';src:url('fonts/poppins-600.woff2') format('woff2');font-weight:600;font-display:swap}
+  .grid .card.proj{width:min(590px,100%);background:none;border:0;border-radius:0;overflow:visible;backdrop-filter:none;-webkit-backdrop-filter:none;
+    display:grid;grid-template-columns:repeat(12,1fr);align-items:center;font-family:'Poppins Local',sans-serif}
+  .proj .thumb{grid-column:6/13;grid-row:1;border-radius:8px;font-size:34px}
+  .proj .info{grid-column:1/8;grid-row:1;position:relative;z-index:1;text-align:left}
+  .proj:nth-child(even) .thumb{grid-column:1/8}
+  .proj:nth-child(even) .info{grid-column:6/13;text-align:right}
+  .proj .kick{font-size:12px;color:#8fc1ff;font-weight:400}
+  .proj h4{font-size:clamp(18px,1.8vw,22px);font-weight:600;margin:2px 0 12px}
+  .proj .desc{margin:0;padding:14px 16px;border-radius:8px;font-size:13px;line-height:1.55;color:#e9eef5;text-align:justify;
+    background:rgba(8,22,45,.62);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .proj .tags{margin-top:10px}
+  .proj h4 a{color:inherit;text-decoration:none}
+  .thumb.has-img{position:relative;overflow:hidden;background:#eef1f5}
+  .thumb.has-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:0;transition:opacity .35s}
+  .thumb.has-img img.on{opacity:1}
+  .thumb .next{position:absolute;right:10px;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border:0;border-radius:50%;
+    background:rgba(10,20,40,.7);color:#fff;font:600 17px 'Poppins Local',sans-serif;cursor:pointer}
+  .proj:nth-child(even) .thumb .next{right:auto;left:10px}
+  .thumb .prev{position:absolute;left:10px;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border:0;border-radius:50%;
+    background:rgba(10,20,40,.7);color:#fff;font:600 17px 'Poppins Local',sans-serif;cursor:pointer}
+  .proj:nth-child(even) .thumb .prev + .next{left:52px}
+  .proj .desc .more{display:block;margin-top:6px;text-align:left;color:#8fc1ff;text-decoration:none}
+  .proj:nth-child(even) .tags{justify-content:flex-end}
+  @media (max-width:760px){
+    .grid .card.proj{display:block}
+    .proj .info,.proj:nth-child(even) .info{text-align:left;margin-top:-34px;padding:0 4%}
+    .proj:nth-child(even) .tags{justify-content:flex-start}
+  }
+  .card{background:rgba(8,40,56,.55);border:1px solid rgba(160,240,230,.22);border-radius:18px;overflow:hidden;
+        backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+        opacity:0;translate:0 80px;transition:opacity .9s ease,translate 1.2s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i)*120ms)}
+  .card.in{opacity:1;translate:0 0}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-9px) rotate(.5deg)}}
+  .thumb{aspect-ratio:16/10;display:grid;place-items:center;font-size:44px;font-weight:700;color:rgba(255,255,255,.9)}
+  .card .txt{padding:16px 18px 20px}
+  .card h4{font-size:19px}
+  .card p{font-size:14.5px;color:#c3d6df;margin-top:6px;line-height:1.45}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  .tags span{font-size:11.5px;padding:4px 9px;border-radius:999px;background:rgba(124,243,255,.12);color:#9ff5e6}
+
+  .contact{padding:6vh 6vw 14vh;text-align:center}
+  .contact h3{font-size:clamp(24px,3vw,34px)}
+  @font-face{font-family:'Space Grotesk Local';src:url('fonts/space-grotesk.woff2') format('woff2');font-display:swap}
+  .contact p{margin:14px auto 0;max-width:680px;color:#e8eef2;font-family:'Space Grotesk Local','Space Grotesk',sans-serif;font-size:15px;line-height:1.6}
+  .contact .mail a{color:#fff;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.35)}
+  .contact .ln{display:block}
+  @media (min-width:760px){.contact .ln{white-space:nowrap}}   /* cada frase numa linha só */
+  .contact .social{display:flex;justify-content:center;gap:22px;margin-top:20px}
+  .contact .social img{width:26px;height:26px;display:block;opacity:.85;transition:opacity .2s,transform .2s}
+  .contact .social a:hover img{opacity:1;transform:translateY(-2px)}
+
+  @media (prefers-reduced-motion: reduce){
+    .card,.card.in{transition:opacity .4s;translate:0 0;animation:none}
+    .ray,.hint span{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="scene" aria-hidden="true">
+  <div id="blurwrap">
+    <canvas id="neon"></canvas>
+    <div id="floor"></div>
+    <!-- Personagem: sequência de quadros (img/f/00–12) -->
+    <div id="char"></div>
+  </div>
+  <canvas id="fx"></canvas>
+  <div id="rays">
+    <div class="ray" style="left:12%;transform:rotate(14deg);animation-delay:-1s"></div>
+    <div class="ray" style="left:32%;transform:rotate(7deg);animation-delay:-3s"></div>
+    <div class="ray" style="left:52%;transform:rotate(-2deg);animation-delay:-5s"></div>
+    <div class="ray" style="left:70%;transform:rotate(-9deg);animation-delay:-2s"></div>
+    <div class="ray" style="left:86%;transform:rotate(-15deg);animation-delay:-4s"></div>
+  </div>
+  <div id="flash"></div>
+</div>
+
+<div class="lang" role="group" aria-label="Language"><span class="pill" aria-hidden="true"></span><button type="button" data-lang="en" class="on">EN</button><button type="button" data-lang="pt">PT</button></div>
+
+<main>
+  <section class="hero">
+    <div class="kicker" data-i18n="kicker">Portfolio</div>
+    <h1>João Henrique</h1>
+    <p data-i18n="roles">Software Engineer<br>Graphic Designer</p>
+  </section>
+
+  <section class="dive">
+    <h2 data-i18n="dive">Dive into my projects</h2>
+  </section>
+
+  <section class="projects">
+    <div class="grid">
+      <article class="card proj" style="--i:0">
+        <div class="thumb has-img"><img src="img/p/serv-1.webp" alt="SeRV — login screen" class="on" loading="lazy"><img src="img/p/serv-2.webp" alt="SeRV — student home" loading="lazy"><img src="img/p/serv-3.webp" alt="SeRV — school calendar" loading="lazy"><img src="img/p/serv-4.webp" alt="SeRV — grades" loading="lazy"><img src="img/p/serv-5.webp" alt="SeRV — quiz and leaderboard" loading="lazy"><img src="img/p/serv-6.webp" alt="SeRV — digital library" loading="lazy"><button class="next" type="button" aria-label="Próxima imagem">&gt;</button></div>
+        <div class="info"><span class="kick" data-i18n="c0-kick">1st Place Project</span><h4><a href="https://www.unirv.edu.br/ver_noticias.php?codabr=20269" data-i18n="c0-title">SeRV</a></h4><p class="desc" data-i18n="c0-desc">School management dashboard for Rio Verde's municipal schools. Won 1st place at UniRV's "Do Código ao Mercado" competition. <a class="more" href="https://www.unirv.edu.br/ver_noticias.php?codabr=20269">Read the news &rarr;</a></p><div class="tags" data-i18n="c0-tags"><span>1st place</span><span>HTML/CSS/JS</span><span>EdTech</span></div></div>
+      </article>
+      <article class="card proj" style="--i:1">
+        <div class="thumb has-img"><img src="img/p/sistac-1.webp" alt="SISTAC — student portal" class="on" loading="lazy"></div>
+        <div class="info"><span class="kick" data-i18n="c1-kick">Team Project</span><h4><a href="https://github.com/Tizoyas/gc-atividade-24-08" data-i18n="c1-title">SISTAC</a></h4><p class="desc" data-i18n="c1-desc">Academic system built by a 13-person team for the Software Configuration Management course, practicing branches, code review, tagged releases, CI and configuration item control on GitHub.</p><div class="tags" data-i18n="c1-tags"><span>Teamwork</span><span>Node.js</span><span>Git &amp; CI</span></div></div>
+      </article>
+      <article class="card proj" style="--i:2">
+        <div class="thumb" style="background:linear-gradient(135deg,#d9822b,#5a2e12)">BM</div>
+        <div class="info"><span class="kick" data-i18n="c2-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/bakery-manager" data-i18n="c2-title">BakeryManager</a></h4><p class="desc" data-i18n="c2-desc">Bakery management system with a REST API: products, ingredients, categories, recipes and technical sheets, plus a simple web interface.</p><div class="tags" data-i18n="c2-tags"><span>Java</span><span>Spring Boot</span><span>PostgreSQL</span></div></div>
+      </article>
+      <article class="card proj" style="--i:0">
+        <div class="thumb" style="background:linear-gradient(135deg,#3a4bd7,#13204f)">VE</div>
+        <div class="info"><span class="kick" data-i18n="c3-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/editor-vetorial" data-i18n="c3-title">Vector Drawing Editor</a></h4><p class="desc" data-i18n="c3-desc">Interactive 2D shape editor that applies GoF design patterns (State, Prototype, Command/Memento, Composite) on an MVC architecture.</p><div class="tags" data-i18n="c3-tags"><span>Java</span><span>JavaFX</span><span>Design Patterns</span></div></div>
+      </article>
+      <article class="card proj" style="--i:1">
+        <div class="thumb has-img"><img src="img/p/garage-1.webp" alt="Vehicle Garage — bookings dashboard" class="on" loading="lazy"><img src="img/p/garage-2.webp" alt="Vehicle Garage — date conflict error" loading="lazy"><button class="next" type="button" aria-label="Próxima imagem">&gt;</button></div>
+        <div class="info"><span class="kick" data-i18n="c4-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/garagem-veiculos" data-i18n="c4-title">Vehicle Garage</a></h4><p class="desc" data-i18n="c4-desc">Booking system for people and vehicles with availability checks, date-conflict validation and JSON persistence, built around SOLID principles.</p><div class="tags" data-i18n="c4-tags"><span>Java</span><span>Spring Boot</span><span>Thymeleaf</span></div></div>
+      </article>
+      <article class="card proj" style="--i:2">
+        <div class="thumb has-img"><img src="img/p/labreserva-1.webp" alt="LabReserva — pending requests" class="on" loading="lazy"><img src="img/p/labreserva-2.webp" alt="LabReserva — resolving a conflict" loading="lazy"><img src="img/p/labreserva-3.webp" alt="LabReserva — lab search (mobile)" loading="lazy"><img src="img/p/labreserva-4.webp" alt="LabReserva — free time slots (mobile)" loading="lazy"><button class="prev" type="button" aria-label="Imagem anterior">&lt;</button></div>
+        <div class="info"><span class="kick" data-i18n="c5-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/labreserva-prototipo" data-i18n="c5-title">LabReserva</a></h4><p class="desc" data-i18n="c5-desc">Clickable mid-fidelity prototype of a lab booking and equipment loan system, with flows for professors, students and technicians.</p><div class="tags" data-i18n="c5-tags"><span>Penpot</span><span>HCI</span><span>Prototype</span></div></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="contact">
+    <h3 data-i18n="contact-title">Contact me</h3>
+    <p data-i18n="contact-text">I'm currently looking to join a cross-functional team that values improving people's lives<br>
+       through accessible design, or have a project in mind? Let's connect.</p>
+    <p class="mail"><a href="mailto:joaohenriquepf2005@gmail.com">joaohenriquepf2005@gmail.com</a></p>
+    <p class="social">
+      <a href="https://www.instagram.com/joaohpff" aria-label="Instagram"><img src="img/icon-instagram.png" alt="Instagram"></a>
+      <a href="https://www.linkedin.com/in/joaohpf" aria-label="LinkedIn"><img src="img/icon-linkedin.png" alt="LinkedIn"></a>
+      <a href="https://github.com/joaohpf" aria-label="GitHub"><img src="img/icon-github.png" alt="GitHub"></a>
+    </p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = q => document.querySelector(q);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const neon = $('#neon'), nctx = neon.getContext('2d');
+  const fx = $('#fx'), fctx = fx.getContext('2d');
+  const chr = $('#char');
+  // 13 quadros, todos na mesma célula 351x426 com o ponto de apoio em x=189 (base)
+  const N = 13, CELL_W = 351, CELL_H = 426, AX = 189;
+  const frames = Array.from({ length: N }, (_, i) => {
+    const im = new Image(); im.src = `img/f/${String(i).padStart(2, '0')}.webp`; im.alt = ''; im.decoding = 'async';
+    chr.appendChild(im); return im;
+  });
+  let cur = -1;
+  const rays = $('#rays'), flash = $('#flash'), floor = $('#floor'), blurwrap = $('#blurwrap');
+
+  const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+  const smooth = x => x * x * (3 - 2 * x);
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const mix = (c1, c2, t) => `rgba(${c1.map((v, i) => i < 3 ? Math.round(lerp(v, c2[i], t)) : lerp(v, c2[i], t).toFixed(3)).join(',')})`;
+
+  // cores da água: raso (verde-água) -> fundo (azul profundo)
+  // cores da água: raso (azul claro, clareando para baixo como no exemplo) -> fundo (azul-marinho)
+  const TOP0 = [44, 108, 190, .74], TOP1 = [14, 52, 104, .78];
+  const BOT0 = [30, 72, 132, .88], BOT1 = [5, 22, 48, .93];
+
+  let W, H, charH, floorY, lastW = 0;
+  let endS = 3;
+  const measure = () => { endS = (document.documentElement.scrollHeight - H) / H; };   // tamanho da página, medido só quando muda
+  function resize() {
+    // no celular a barra de endereço aparece/some durante o deslize e muda a altura da tela;
+    // nesses casos não recria nada (recriar o canvas no meio do deslize causava a travada)
+    if (H && innerWidth === lastW) return;
+    H = innerHeight; lastW = W = innerWidth;
+    const dpr = Math.min(devicePixelRatio || 1, 1.5);   // resolução do canvas limitada: bem mais leve no celular
+    fx.width = W * dpr; fx.height = H * dpr;
+    fx.style.width = '100%'; fx.style.height = '100%';
+    fctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    charH = Math.min(H * 0.52, W * 0.95 * CELL_H / CELL_W);   // altura do quadro na tela
+    floorY = H * 0.86;
+    chr.style.width = charH * CELL_W / CELL_H + 'px';
+    chr.style.height = charH + 'px';
+    floor.style.top = floorY + 'px';
+    measure();
+  }
+  addEventListener('resize', resize);
+  addEventListener('load', measure);
+  resize();
+
+  // ---------- neon (primeira parte do vídeo) ----------
+  function drawNeon(t) {
+    nctx.clearRect(0, 0, W, H);
+    nctx.globalCompositeOperation = 'lighter';
+    const curve = (i, fromRight) => {
+      const ph = t * .5 + i * .7, hue = (i * 37 + t * 25 + (fromRight ? 180 : 0)) % 360;
+      const fx_ = x => fromRight ? W - x : x;
+      nctx.beginPath();
+      nctx.moveTo(fx_(W * (-.05 + .06 * i)), H * 1.05);
+      nctx.bezierCurveTo(
+        fx_(W * (.05 + .05 * i) + Math.sin(ph) * 50), H * (.45 - .02 * i),
+        fx_(W * (.35 + .05 * i) + Math.cos(ph) * 70), H * (.02 * i) + Math.sin(ph * 1.3) * 30,
+        fx_(W * (.7 + .05 * i)), -30);
+      nctx.strokeStyle = `hsla(${hue},100%,60%,.16)`; nctx.lineWidth = 12; nctx.stroke();
+      nctx.strokeStyle = `hsla(${hue},100%,66%,.95)`; nctx.lineWidth = 2.4; nctx.stroke();
+    };
+    for (let i = 0; i < 9; i++) curve(i, false);
+    for (let i = 0; i < 5; i++) curve(i, true);
+    nctx.globalCompositeOperation = 'source-over';
+  }
+
+  // ---------- bolhas e espuma ----------
+  // bolha em pixel art (7x7), estilo Minecraft: contorno azul escuro à esquerda/topo, azul claro à direita/base
+  const BUB = ['..DDD..', '.D...L.', 'D.....L', 'D.....L', 'D.....L', '.D...L.', '..LLL..'];
+  const bubSprite = document.createElement('canvas'); bubSprite.width = bubSprite.height = 7;
+  { const c = bubSprite.getContext('2d');
+    BUB.forEach((row, y) => [...row].forEach((ch, x) => { if (ch !== '.') { c.fillStyle = ch === 'D' ? '#2196F3' : '#4FC3F7'; c.fillRect(x, y, 1, 1); } })); }
+  // 10 bolhas paradas, em posições fixas da tela (fração da largura/altura) e tamanhos variados
+  const bubbles = [
+    [.08, .30, 14], [.86, .62, 12],                  // gigantes
+    [.22, .78, 6], [.70, .22, 6], [.93, .18, 5],     // médias
+    [.15, .55, 3], [.36, .40, 2], [.62, .85, 3], [.80, .40, 2], [.47, .68, 2]  // pequenas
+  ].map(([fx, fy, px]) => ({ fx, fy, px, size: px * 7 }));
+  // ---------- gotas 2D do splash ----------
+  let drops = [];
+  // rastro do personagem debaixo d'água: quadradinhos que ficam onde ele passou e vão sumindo
+  const trail = [];
+  function splash(cx, surf) {
+    for (let i = 0; i < 18; i++) {
+      const x = cx + (Math.random() - .5) * charH * .9;
+      drops.push({ x, y: surf + surfaceAt(x) - 2,
+                   vx: (Math.random() - .5) * 5, vy: -(6 + Math.random() * 8),
+                   r: 3 + Math.random() * 5, c: Math.random() < .5 ? '#2196F3' : '#4FC3F7' });
+    }
+  }
+  // gota em forma de quadradinho (pixel), mesmas cores das bolhas
+  function drawDrop(d) {
+    const z = Math.max(3, Math.round(d.r * 1.3));
+    const x = Math.round(d.x - z / 2), y = Math.round(d.y - z / 2);
+    fctx.fillStyle = d.c; fctx.fillRect(x, y, z, z);
+  }
+  // superfície parada, feita de 3 faixas de onda sobrepostas (estilo do exemplo)
+  const curve = (x, off, amp, cyc, ph, amp2 = 0) =>
+    off + amp * Math.sin(x / W * 6.283 * cyc + ph) + amp2 * Math.sin(x / W * 6.283 * cyc * 2.3 + ph * 1.7);
+  const LAYERS = [ // [deslocamento, amplitude, ciclos na tela, fase, amp2, preenchimento, contorno, espessura]
+    [-4, 30, 1.4, .6, 8, 'rgba(60,135,220,.75)', 'rgba(22,86,190,.95)', 2.6],
+  ];
+  const surfaceAt = x => curve(x, -4, 30, 1.4, .6, 8);
+  const path = (surf, L) => {
+    fctx.beginPath();
+    for (let x = 0; x <= W + 12; x += 12) fctx[x ? 'lineTo' : 'moveTo'](x, surf + curve(x, L[0], L[1], L[2], L[3], L[4]));
+  };
+
+  // ---------- tubarões (sprite de 12 quadros, do GIF enviado) nadando em direções e alturas aleatórias ----------
+  const sharkImg = new Image(); sharkImg.src = 'img/shark.png';
+  const SH_W = 380, SH_H = 108, SH_N = 12;
+  // dois tubarões presos à página, cada um num vão entre dois cards: [card de cima, card de baixo]
+  const sharks = [{ gap: [1, 2], x: 40, dir: 1, sp: 1.1, sc: .45, f: 0 },     // entre SISTAC e BakeryManager
+                  { gap: [4, 5], x: 400, dir: -1, sp: .9, sc: .4, f: 6 }];   // entre Vehicle Garage e LabReserva
+  const PX = 6;   // tamanho do "pixel" da água
+  const pix = document.createElement('canvas'), pctx = pix.getContext('2d');
+  const hash = (a, b) => { const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return v - Math.floor(v); };   // ruído fixo para o pontilhado
+  function drawFx(level, d, t) {
+    fctx.clearRect(0, 0, W, H);
+    const surf = H - level;
+    if (level > .5) {
+      // água em pixel art: desenhada numa tela pequena (1 pixel = PX px) e ampliada sem suavização
+      const cw = Math.ceil(W / PX) + 1, ch = Math.ceil(H / PX) + 1;
+      if (pix.width !== cw || pix.height !== ch) { pix.width = cw; pix.height = ch; }
+      pctx.clearRect(0, 0, cw, ch);
+      const g = pctx.createLinearGradient(0, Math.max(surf / PX, -ch * .5), 0, ch);
+      g.addColorStop(0, mix(TOP0, TOP1, d)); g.addColorStop(1, mix(BOT0, BOT1, d));
+      pctx.fillStyle = g;
+      const tops = [];
+      for (let c = 0; c < cw; c++) {   // corpo da água, coluna por coluna, começando na linha da onda
+        const y = Math.round((surf + surfaceAt(c * PX)) / PX); tops.push(y);
+        pctx.fillRect(c, Math.max(0, y), 1, ch);
+      }
+      if (surf > -80 && surf < H + 40) {
+        pctx.globalAlpha = 1 - d;
+        const s0 = Math.round(surf / PX);
+        for (let c = 0; c < cw; c++) {
+          const y = tops[c];
+          pctx.fillStyle = '#5fb0f7'; pctx.fillRect(c, y, 1, 1);                    // borda clara da onda
+          pctx.fillStyle = 'rgba(70,150,235,.9)'; pctx.fillRect(c, y + 1, 1, 1);
+          pctx.fillStyle = 'rgba(20,60,140,.35)';                                   // pontilhado escuro logo abaixo
+          for (let r = 3; r < 9; r++) if (hash(c, r) < .35 - r * .03) pctx.fillRect(c, y + r, 1, 1);
+        }
+        for (const [o, a, cyc, ph] of [[9, 2.2, 1.9, .4], [15, 2, 2.4, 2.1], [21, 1.8, 1.6, 3.6]]) {   // 3 faixas onduladas claras
+          pctx.fillStyle = `rgba(150,200,250,${(.38 - o * .006).toFixed(3)})`;
+          for (let c = 0; c < cw; c++) pctx.fillRect(c, Math.round(s0 + o + a * Math.sin(c * PX / W * 6.283 * cyc + ph)), 1, 2);
+        }
+        pctx.globalAlpha = 1;
+      }
+      fctx.imageSmoothingEnabled = false;
+      fctx.drawImage(pix, 0, 0, cw * PX, ch * PX);
+    }
+    // tubarões: nadam de uma ponta à outra da tela no vão entre os cards e acompanham o scroll como os cards
+    if (sharkImg.complete) {
+      const cards = document.querySelectorAll('.proj');
+      fctx.imageSmoothingEnabled = false; fctx.globalAlpha = .85;
+      for (const k of sharks) {
+        const A = cards[k.gap[0]], B = cards[k.gap[1]];
+        if (!A || !B) continue;
+        const w = SH_W * k.sc, h = SH_H * k.sc, y = (A.getBoundingClientRect().bottom + B.getBoundingClientRect().top) / 2 - h / 2;
+        if (!reduce) {
+          k.x += k.dir * k.sp; k.f = (k.f + .09 * k.sp) % SH_N;
+          if (k.x > W - w - 10) { k.x = W - w - 10; k.dir = -1; }   // chega na ponta e vira
+          if (k.x < 10) { k.x = 10; k.dir = 1; }
+        }
+        if (y < -h || y > H || y < surf + surfaceAt(k.x + w / 2) + 10) continue;
+        fctx.save(); fctx.translate(Math.round(k.x + (k.dir < 0 ? w : 0)), Math.round(y + Math.sin(t * .8 + k.f) * 3)); fctx.scale(k.dir, 1);
+        fctx.drawImage(sharkImg, Math.floor(k.f) * SH_W, 0, SH_W, SH_H, 0, 0, w, h);
+        fctx.restore();
+      }
+      fctx.globalAlpha = 1;
+    }
+    // bolhas presas à água: sobem junto com a superfície enquanto ela enche;
+    // depois que a tela fica submersa, continuam subindo conforme o scroll (as grandes um pouco mais rápido)
+    fctx.imageSmoothingEnabled = false;
+    const span = H * 1.25, after = Math.max(0, scrollY / H - 2.2) * H;
+    for (const b of bubbles) {
+      let off = (b.fy * span - after * (.35 + b.px * .03)) % span; if (off < 0) off += span;
+      const x = Math.round(b.fx * W / b.px) * b.px;
+      const y = Math.round((surf + 40 + surfaceAt(x) + off) / b.px) * b.px;
+      if (y > surf + 6 && y < H + b.size) fctx.drawImage(bubSprite, x - b.size / 2, y - b.size / 2, b.size, b.size);
+    }
+    fctx.globalAlpha = .9;   // rastro: quadradinhos presos à página
+    for (const q of trail) {
+      const y = q.y - scrollY;   // presos à página: sobem quando você rola para baixo, sem se mexer sozinhos
+      if (y < -20 || y > H + 20 || y < surf + surfaceAt(q.x) + 4) continue;   // não aparece fora da água
+      fctx.fillStyle = q.c; fctx.fillRect(Math.round(q.x - q.z / 2), Math.round(y - q.z / 2), q.z, q.z);
+    }
+    fctx.globalAlpha = 1;
+    // gotas: sobem, caem com a gravidade e somem quando tocam a água de novo
+    drops = drops.filter(p => !(p.vy > 0 && p.y > surf + surfaceAt(p.x) + 2));
+    for (const p of drops) { p.x += p.vx; p.y += p.vy; p.vy += .38; drawDrop(p); }
+  }
+
+  // ---------- linha do tempo ligada ao scroll ----------
+  let impacted = false, flashA = 0, lastBlur = '', splashed = false, lastRayTop = -1;
+  function frame(now) {
+    const t = now / 1000;
+    const s = scrollY / H;                       // posição em "telas"
+
+    const fall = clamp(s / 1.0);                 // 0–1 tela: queda de costas
+    // sequência de quadros: de pé (0) -> caído (último)
+    const idx = Math.round(fall * (N - 1));
+    if (idx !== cur) { if (cur >= 0) frames[cur].classList.remove('on'); frames[idx].classList.add('on'); cur = idx; }
+    // água: sobe no fim da queda e já cobre o personagem quando chega o desfoque (0.72–0.92), depois enche a tela (0.92–2.2)
+    const cover = H - floorY + charH * .7;
+    const level = cover * smooth(clamp((s - .72) / .2)) + (H * 1.15 - cover) * smooth(clamp((s - .92) / 1.28));
+    const water = level / (H * 1.15);
+    const float = smooth(clamp((s - 1.5) / 1.0));   // boiando debaixo d'água
+    const depth = clamp((s - 2.1) / 1.4);           // fica mais fundo/escuro
+
+    const sway = reduce ? 0 : Math.sin(t * .8) * 4 * float;
+    // debaixo d'água o personagem vai diminuindo (afundando), indo para o centro
+    // cresce devagar e de forma linear, do momento em que fica submerso até o fim da página
+    const grow = clamp((s - 1.2) / Math.max(1, endS - 1.2));
+    const lift = float * charH * .18 + (reduce ? 0 : Math.sin(t * 1.1) * 6 * float);
+    const charW = charH * CELL_W / CELL_H;
+    const sc = lerp(1, .35, grow);   // termina com ~1/3 do tamanho
+    const ox0 = W / 2 - AX / CELL_W * charW + .517 * charW, oy0 = floorY - lift - charH + .729 * charH;   // centro da pose
+    const ox = lerp(ox0, W / 2, grow), oy = lerp(oy0, H / 2, grow) - lift * grow;
+    chr.style.transform = `translate(${ox - .517 * charW}px,${oy - .729 * charH}px) rotate(${sway}deg) scale(${sc})`;
+    // rastro: a cada trecho de scroll fica um quadradinho fixo acima de onde o personagem estava naquele ponto.
+    // Ele fica lá para sempre e só some se você rolar de volta para antes desse ponto.
+    // O tamanho acompanha o tamanho que o personagem tinha ali.
+    const posAt = sx => {
+      const g = clamp((sx - 1.2) / Math.max(1, endS - 1.2)), lf = smooth(clamp((sx - 1.5) / 1.0)) * charH * .18;
+      const x0 = W / 2 - AX / CELL_W * charW + .517 * charW, y0 = floorY - lf - charH + .729 * charH;
+      return { x: lerp(x0, W / 2, g), y: lerp(y0, H / 2, g) - lf * g, k: lerp(1, .35, g) };
+    };
+    const STEP = .045;   // intervalo de scroll entre um quadradinho e outro (menor = mais quadradinhos)
+    while (trail.length && trail[trail.length - 1].s > s) trail.pop();   // rolou para cima: apaga o caminho que ficou à frente
+    for (let next = trail.length ? trail[trail.length - 1].s + STEP : .95; next <= s; next += STEP) {
+      const p = posAt(next), ang = -Math.PI / 2 + (Math.random() - .5) * 2.2, dist = charH * p.k * (.35 + Math.random() * .45);
+      trail.push({ s: next, x: p.x + Math.cos(ang) * dist, y: p.y + Math.sin(ang) * dist * .8 + next * H,   // y na página (sobe junto com o scroll)
+                   z: Math.max(2, Math.round((3 + Math.random() * 5) * 1.3 * p.k)), c: Math.random() < .5 ? '#2196F3' : '#4FC3F7' });
+    }
+    chr.style.opacity = 1 - .2 * depth;
+    const footX = W / 2, footY = floorY;
+    // splash: logo que a água começa a subir e encosta no personagem
+    if (!splashed && s >= .77) { splashed = true; if (!reduce) splash(W / 2, H - level); }
+    if (s < .65) { splashed = false; drops = []; }
+
+    // desfoque rápido no fim da queda (o "corte" do vídeo)
+    const b = reduce ? 0 : Math.max(0, 1 - Math.abs(s - 1.0) / .14);
+    // desfoque só no personagem (antes era na tela inteira, o que pesava muito no celular)
+    const bf = b > .01 ? `blur(${(b * 5).toFixed(1)}px)` : '';
+    if (bf !== lastBlur) { chr.style.filter = bf; lastBlur = bf; }
+    neon.style.opacity = 1 - clamp((s - .75) / .4);
+    floor.style.opacity = 1 - water;
+
+    // impacto: flash + espuma
+
+    rays.style.opacity = clamp((s - 1.4) / .8) * (.9 - .4 * depth);
+    // raios de luz só dentro da água: corta tudo que fica acima da superfície
+    // os raios nascem exatamente na linha da onda: a camada desce junto com a superfície e é recortada no formato da onda
+    const surfY = Math.round(H - level);
+    if (surfY !== lastRayTop) {
+      const off = Math.max(-H * .3, surfY - 30), pts = [];
+      for (let x = 0; x <= W + 40; x += 40) pts.push(`${x}px ${(surfY + surfaceAt(x) - off).toFixed(1)}px`);
+      rays.style.transform = `translateY(${off}px)`;
+      rays.style.clipPath = `polygon(${pts.join(',')},${W + 40}px ${H * 1.6}px,0px ${H * 1.6}px)`;
+      lastRayTop = surfY;
+    }
+
+    drawFx(level, depth, t);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // cards sobem boiando quando entram na tela
+  const io = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  }), { threshold: .2 });
+  document.querySelectorAll('.card').forEach(c => io.observe(c));
+  // idioma: abre sempre em inglês; EN/PT trocam os textos marcados com data-i18n
+  const PT = {
+ "kicker": "Portfólio",
+ "roles": "Engenheiro de Software<br>Designer Gráfico",
+ "dive": "Mergulhe nos meus projetos",
+ "contact-title": "Fale comigo",
+ "contact-text": "<span class=\"ln\">Estou buscando entrar em uma equipe multidisciplinar que valorize melhorar a vida das</span><span class=\"ln\">pessoas através do design acessível.</span><span class=\"ln\">Tem um projeto em mente? Vamos conversar.</span>",
+ "c0-kick": "Projeto 1º lugar",
+ "c0-desc": "Painel de gestão escolar para as escolas municipais de Rio Verde. Ficou em 1º lugar na competição \"Do Código ao Mercado\" da UniRV. <a class=\"more\" href=\"https://www.unirv.edu.br/ver_noticias.php?codabr=20269\">Leia a notícia &rarr;</a>",
+ "c0-tags": "<span>1º lugar</span><span>HTML/CSS/JS</span><span>EdTech</span>",
+ "c1-kick": "Projeto em equipe",
+ "c1-desc": "Sistema acadêmico feito por uma equipe de 13 pessoas na disciplina de Gerência de Configuração de Software, praticando branches, revisão de código, versões com tag, CI e controle de itens de configuração no GitHub.",
+ "c1-tags": "<span>Trabalho em equipe</span><span>Node.js</span><span>Git &amp; CI</span>",
+ "c2-kick": "Projeto em destaque",
+ "c2-desc": "Sistema de gestão de padaria com API REST: produtos, ingredientes, categorias, receitas e fichas técnicas, além de uma interface web simples.",
+ "c3-kick": "Projeto em destaque",
+ "c3-title": "Editor Vetorial",
+ "c3-desc": "Editor interativo de formas 2D que aplica padrões de projeto GoF (State, Prototype, Command/Memento, Composite) em uma arquitetura MVC.",
+ "c3-tags": "<span>Java</span><span>JavaFX</span><span>Padrões de projeto</span>",
+ "c4-kick": "Projeto em destaque",
+ "c4-title": "Garagem de Veículos",
+ "c4-desc": "Sistema de reservas de pessoas e veículos com verificação de disponibilidade, validação de conflito de datas e persistência em JSON, seguindo os princípios SOLID.",
+ "c5-kick": "Projeto em destaque",
+ "c5-desc": "Protótipo clicável de média fidelidade de um sistema de reserva de laboratórios e empréstimo de equipamentos, com fluxos para professores, alunos e técnicos.",
+ "c5-tags": "<span>Penpot</span><span>IHC</span><span>Protótipo</span>"
+};
+  const i18n = [...document.querySelectorAll('[data-i18n]')];
+  i18n.forEach(el => { el.dataset.en = el.innerHTML; });
+  // efeito "hackeado": as letras viram 0/1 aleatórios e vão se revelando da esquerda para a direita
+  function scramble(el, html) {
+    const from = el.textContent ? el.innerHTML.replace(/<span class="bin">(.)<\/span>/g, '$1').split('<br>') : [], to = html.split('<br>');
+    const n = Math.max(from.length, to.length), start = performance.now(), dur = 1100;
+    cancelAnimationFrame(el._raf);
+    const step = now => {
+      const p = Math.min(1, (now - start) / dur);
+      const lines = [];
+      for (let i = 0; i < n; i++) {
+        const a = from[i] || '', b = to[i] || '', len = Math.max(a.length, b.length);
+        let out = '';
+        for (let j = 0; j < len; j++) {
+          const reveal = .25 + .7 * (j / Math.max(1, len)) + i * .03;   // cada letra tem seu momento de aparecer
+          out += p >= reveal ? (b[j] || '') : `<span class="bin">${Math.random() < .5 ? '0' : '1'}</span>`;   // binário em verde
+        }
+        lines.push(out);
+      }
+      el.innerHTML = lines.join('<br>');
+      if (p < 1) el._raf = requestAnimationFrame(step); else el.innerHTML = html;
+    };
+    el._raf = requestAnimationFrame(step);
+  }
+  let langReady = false;
+  function setLang(l) {
+    document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
+    i18n.forEach(el => {
+      const t = l === 'pt' ? PT[el.dataset.i18n] : undefined, html = t ?? el.dataset.en;
+      if ((el.dataset.i18n === 'roles' || el.dataset.i18n === 'kicker') && langReady && !reduce && html !== el.innerHTML) scramble(el, html);
+      else el.innerHTML = html;
+    });
+    langReady = true;
+    $('.lang').classList.toggle('pt', l === 'pt');
+    document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('on', b.dataset.lang === l));
+    measure();
+  }
+  document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+  setLang('en');
+
+  // setas das imagens dos projetos (dão a volta no fim/início)
+  document.querySelectorAll('.thumb .next, .thumb .prev').forEach(btn => btn.addEventListener('click', () => {
+    const step = btn.classList.contains('prev') ? -1 : 1;   // "<" volta, ">" avança
+    const imgs = [...btn.parentElement.querySelectorAll('img')], i = imgs.findIndex(im => im.classList.contains('on'));
+    imgs[i].classList.remove('on'); imgs[(i + step + imgs.length) % imgs.length].classList.add('on');
+  }));
+})();
+</script>
+</body>
+</html>
