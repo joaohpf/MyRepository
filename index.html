@@ -418,7 +418,7 @@
   }
 
   // ---------- linha do tempo ligada ao scroll ----------
-  let impacted = false, flashA = 0, lastBlur = '', splashed = false, lastRayTop = -1;
+  let impacted = false, flashA = 0, lastBlur = '', splashed = false, lastRayTop = -1, blurAt = -1e9;
   const aboutEl = document.querySelector('.about');
   function frame(now) {
     const t = now / 1000;
@@ -432,7 +432,7 @@
     const cover = H - floorY + charH * .7;
     let level = cover * smooth(clamp((s - .72) / .2)) + (H * 1.15 - cover) * smooth(clamp((s - .92) / 1.28));
     // a água nunca chega mais perto do "Sobre mim" do que um espaço fixo: enquanto o texto está na tela, ela sobe junto com ele
-    { const ab = aboutEl.getBoundingClientRect().bottom, gap = H * (innerWidth <= 760 ? .2 : .12);
+    { const ab = aboutEl.getBoundingClientRect().bottom, gap = H * (innerWidth <= 760 ? .5 : .12);
       if (ab > -gap) level = Math.min(level, Math.max(0, H - ab - gap - 45)); }   // 45: altura máxima da crista da onda
     const water = level / (H * 1.15);
     const float = smooth(clamp((s - 1.5) / 1.0));   // boiando debaixo d'água
@@ -466,11 +466,16 @@
     chr.style.opacity = 1 - .2 * depth;
     const footX = W / 2, footY = floorY;
     // splash: logo que a água começa a subir e encosta no personagem
-    if (!splashed && s >= .77) { splashed = true; if (!reduce) splash(W / 2, H - level); }
-    if (s < .65) { splashed = false; drops = []; }
+    // splash: no instante em que a superfície da água encosta no personagem
+    let touching = false;
+    { const cb = chr.getBoundingClientRect().bottom - charH * .04, surfY = H - level + surfaceAt(W / 2); touching = level > 2 && surfY <= cb;
+      if (!splashed && level > 2 && surfY <= cb) { splashed = true; blurAt = now; if (!reduce) splash(W / 2, H - level); }
+      if (splashed && (level <= 2 || surfY > cb + 40)) { splashed = false; drops = []; } }
 
     // desfoque rápido no fim da queda (o "corte" do vídeo)
-    const b = reduce ? 0 : Math.max(0, 1 - Math.abs(s - 1.0) / .14);
+    // desfoque: um pulso rápido junto com o splash (só quando ele cai na água); fora da água nunca fica desfocado
+    const bt = (now - blurAt) / 500;
+    const b = reduce || !splashed || !touching || bt < 0 || bt > 1 ? 0 : Math.sin(bt * Math.PI);   // fora da água: sempre nítido
     // desfoque só no personagem (antes era na tela inteira, o que pesava muito no celular)
     const bf = b > .01 ? `blur(${(b * 5).toFixed(1)}px)` : '';
     if (bf !== lastBlur) { chr.style.filter = bf; lastBlur = bf; }
