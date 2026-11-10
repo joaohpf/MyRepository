@@ -20,7 +20,7 @@ I came up with the concept (my 2D character falling backwards into the water whi
 
 ## Demo
 
-Live site: **https://repositorio-lilac.vercel.app**
+Live site: **[https://repositorio-lilac.vercel.app](https://joaohpf.dev/)**
 
 ## Result
 
