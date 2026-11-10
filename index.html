@@ -45,17 +45,18 @@
   /* letras em pixel (estilo da referência): branco com sombra cinza deslocada */
   /* mini cards das tecnologias flutuando em volta do personagem */
   .stack{position:absolute;inset:0;pointer-events:none;--k:1}
-  .chip{position:absolute;left:calc(50% + var(--x) * 1px * var(--k));top:var(--y);transform:translate(-50%,-50%);
+  .chip{position:absolute;left:clamp(46px, calc(50% + var(--x) * 1px * var(--k)), calc(100% - 46px));top:var(--y);transform:translate(-50%,-50%);
     display:flex;align-items:center;gap:10px;padding:7px 14px 7px 7px;border-radius:12px;white-space:nowrap;
-    font:600 13px 'Poppins Local',sans-serif;color:#fff;letter-spacing:0;text-shadow:none;text-transform:none;
-    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+    font:600 13px 'Poppins Local',sans-serif;color:#15181d;letter-spacing:0;text-shadow:none;text-transform:none;
+    background:rgba(255,255,255,.72);border:1px solid rgba(255,255,255,.85);   /* branco translúcido */
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.35);
     animation:chipFloat var(--d) ease-in-out var(--dl) infinite}
-  .chip .ico{width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center}
+  .chip .ico{width:30px;height:30px;border-radius:8px;background:#fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.12)}
   .chip .ico img{width:20px;height:20px}
   @keyframes chipFloat{0%,100%{translate:0 0}50%{translate:0 -10px}}
   @media (max-width:760px){
     .stack{--k:.43}
+    .chip.pair{--k:.85}   /* Git e GitHub não se encostam no celular */
     .chip{gap:6px;padding:4px 9px 4px 4px;border-radius:9px;font-size:10px}
     .chip .ico{width:22px;height:22px;border-radius:6px}
     .chip .ico img{width:15px;height:15px}
@@ -171,14 +172,17 @@
     <h1>João Henrique</h1>
     <p data-i18n="roles">Software Engineer<br>Graphic Designer</p>
     <div class="stack" aria-label="Tech stack">
-      <div class="chip" style="--x:-300;--y:44%;--d:3.6s;--dl:-0.00s"><span class="ico"><img src="img/stack/java-original.svg" alt=""></span>Java</div>
-      <div class="chip" style="--x:230;--y:52%;--d:4.3s;--dl:-0.55s"><span class="ico"><img src="img/stack/spring-original.svg" alt=""></span>Spring Boot</div>
-      <div class="chip" style="--x:-340;--y:64%;--d:5.0s;--dl:-1.10s"><span class="ico"><img src="img/stack/postgresql-original.svg" alt=""></span>PostgreSQL</div>
-      <div class="chip" style="--x:300;--y:68%;--d:5.7s;--dl:-1.65s"><span class="ico"><img src="img/stack/javascript-original.svg" alt=""></span>JavaScript</div>
-      <div class="chip" style="--x:220;--y:84%;--d:3.6s;--dl:-2.20s"><span class="ico"><img src="img/stack/nodejs-original.svg" alt=""></span>Node.js</div>
-      <div class="chip" style="--x:-270;--y:84%;--d:4.3s;--dl:-2.75s"><span class="ico"><img src="img/stack/html5-original.svg" alt=""></span>HTML &amp; CSS</div>
-      <div class="chip" style="--x:-200;--y:30%;--d:5.0s;--dl:-3.30s"><span class="ico"><img src="img/stack/git-original.svg" alt=""></span>Git</div>
-      <div class="chip" style="--x:170;--y:36%;--d:5.7s;--dl:-3.85s"><span class="ico"><img src="img/stack/github-original.svg" alt=""></span>GitHub</div>
+      <div class="chip pair" style="--x:-70;--y:33.5%;--d:3.6s;--dl:-0.00s"><span class="ico"><img src="img/stack/git-original.svg" alt=""></span>Git</div>
+      <div class="chip pair" style="--x:65;--y:33.5%;--d:4.3s;--dl:-0.55s"><span class="ico"><img src="img/stack/github-original.svg" alt=""></span>GitHub</div>
+      <div class="chip" style="--x:-300;--y:42%;--d:5.0s;--dl:-1.10s"><span class="ico"><img src="img/stack/java-original.svg" alt=""></span>Java</div>
+      <div class="chip" style="--x:-450;--y:54%;--d:5.7s;--dl:-1.65s"><span class="ico"><img src="img/stack/c-original.svg" alt=""></span>C</div>
+      <div class="chip" style="--x:-310;--y:66%;--d:3.6s;--dl:-2.20s"><span class="ico"><img src="img/stack/postgresql-original.svg" alt=""></span>PostgreSQL</div>
+      <div class="chip" style="--x:-460;--y:76%;--d:4.3s;--dl:-2.75s"><span class="ico"><img src="img/stack/r-original.svg" alt=""></span>R</div>
+      <div class="chip" style="--x:-290;--y:86%;--d:5.0s;--dl:-3.30s"><span class="ico"><img src="img/stack/html5-original.svg" alt=""></span>HTML &amp; CSS</div>
+      <div class="chip" style="--x:430;--y:44%;--d:5.7s;--dl:-3.85s"><span class="ico"><img src="img/stack/python-original.svg" alt=""></span>Python</div>
+      <div class="chip" style="--x:300;--y:56%;--d:3.6s;--dl:-4.40s"><span class="ico"><img src="img/stack/spring-original.svg" alt=""></span>Spring Boot</div>
+      <div class="chip" style="--x:440;--y:68%;--d:4.3s;--dl:-4.95s"><span class="ico"><img src="img/stack/javascript-original.svg" alt=""></span>JavaScript</div>
+      <div class="chip" style="--x:280;--y:82%;--d:5.0s;--dl:-5.50s"><span class="ico"><img src="img/stack/nodejs-original.svg" alt=""></span>Node.js</div>
     </div>
   </section>
 
