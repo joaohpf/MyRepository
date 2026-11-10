@@ -43,10 +43,23 @@
   .hero{height:100vh;padding:9vh 7vw 0;position:relative;text-align:right}
   @font-face{font-family:'Silkscreen';src:url('fonts/silkscreen.woff2') format('woff2');font-display:swap}
   /* letras em pixel (estilo da referência): branco com sombra cinza deslocada */
-  .hero .kicker,.hero h1,.hero p{font-family:'Silkscreen',monospace;color:#fff;text-transform:uppercase;text-shadow:.12em .12em 0 #2e302d}
-  .hero .kicker{font-size:16px;letter-spacing:.12em}
-  .hero h1{font-size:clamp(34px,6.5vw,80px);line-height:1;margin-top:10px;font-weight:400;letter-spacing:.04em}
-  .hero p{margin-top:14px;font-size:clamp(15px,1.8vw,22px);letter-spacing:.06em}
+  /* "Sobre mim" à esquerda do personagem (no celular, abaixo dele) */
+  .about{position:absolute;left:7vw;top:24vh;width:min(520px, calc(43vw - 120px));text-align:left;font-family:'Silkscreen',monospace}
+  .about-kick{font:12px 'Silkscreen',monospace;letter-spacing:.22em;text-transform:uppercase;color:#7c8594}
+  .about-h{margin-top:14px;font-weight:400;font-size:clamp(22px,2.6vw,36px);line-height:1.15;letter-spacing:.02em;color:#fff;text-shadow:none}
+  .about-h > span{display:block}
+  .about-h .dim{color:#6b7280}
+  .about-sub{margin-top:22px;font-size:clamp(13px,1.15vw,16px);color:#eef1f5}
+  .about-text{margin-top:14px;font-size:12px;line-height:1.9;color:#9aa1ad}
+  .about-text b{color:#fff;font-weight:400}
+  @media (max-width:760px){
+    .about{left:6vw;right:6vw;width:auto;top:92vh}
+    .about-text{font-size:11px}
+  }
+  .hero > .kicker,.hero > h1,.hero > p{font-family:'Silkscreen',monospace;color:#fff;text-transform:uppercase;text-shadow:.12em .12em 0 #2e302d}
+  .hero > .kicker{font-size:16px;letter-spacing:.12em}
+  .hero > h1{font-size:clamp(34px,6.5vw,80px);line-height:1;margin-top:10px;font-weight:400;letter-spacing:.04em}
+  .hero > p{margin-top:14px;font-size:clamp(15px,1.8vw,22px);letter-spacing:.06em}
   .hint{position:absolute;bottom:3.5vh;left:0;right:0;text-align:center;font-size:13px;color:#b9c9d6;letter-spacing:.15em;text-transform:uppercase}
   .hint span{display:inline-block;animation:hint 1.6s ease-in-out infinite}
   @keyframes hint{50%{transform:translateY(6px)}}
@@ -152,6 +165,12 @@
     <div class="kicker" data-i18n="kicker">Portfolio</div>
     <h1>João Henrique</h1>
     <p data-i18n="roles">Software Engineer<br>Graphic Designer</p>
+    <div class="about">
+      <div class="about-kick" data-i18n="about-kick">About me</div>
+      <h2 class="about-h"><span data-i18n="about-h1">Full Stack Developer</span><span class="dim" data-i18n="about-h2">in training.</span></h2>
+      <p class="about-sub" data-i18n="about-sub">Building original products end to end.</p>
+      <p class="about-text" data-i18n="about-text">I'm a <b>Software Engineering student at UniRV</b> and already trained as a <b>Graphic Designer</b>. I'm building my path as a <b>Full Stack Developer</b>, creating applications that bring together <b>intuitive interfaces</b>, programming logic and <b>scalable solutions</b>. I enjoy turning ideas into <b>modern digital products</b>, combining technology, design (above all) and a well-planned user experience.</p>
+    </div>
   </section>
 
   <section class="dive">
@@ -400,6 +419,7 @@
 
   // ---------- linha do tempo ligada ao scroll ----------
   let impacted = false, flashA = 0, lastBlur = '', splashed = false, lastRayTop = -1;
+  const aboutEl = document.querySelector('.about');
   function frame(now) {
     const t = now / 1000;
     const s = scrollY / H;                       // posição em "telas"
@@ -410,7 +430,10 @@
     if (idx !== cur) { if (cur >= 0) frames[cur].classList.remove('on'); frames[idx].classList.add('on'); cur = idx; }
     // água: sobe no fim da queda e já cobre o personagem quando chega o desfoque (0.72–0.92), depois enche a tela (0.92–2.2)
     const cover = H - floorY + charH * .7;
-    const level = cover * smooth(clamp((s - .72) / .2)) + (H * 1.15 - cover) * smooth(clamp((s - .92) / 1.28));
+    let level = cover * smooth(clamp((s - .72) / .2)) + (H * 1.15 - cover) * smooth(clamp((s - .92) / 1.28));
+    // a água nunca chega mais perto do "Sobre mim" do que um espaço fixo: enquanto o texto está na tela, ela sobe junto com ele
+    { const ab = aboutEl.getBoundingClientRect().bottom, gap = H * (innerWidth <= 760 ? .2 : .12);
+      if (ab > -gap) level = Math.min(level, Math.max(0, H - ab - gap - 45)); }   // 45: altura máxima da crista da onda
     const water = level / (H * 1.15);
     const float = smooth(clamp((s - 1.5) / 1.0));   // boiando debaixo d'água
     const depth = clamp((s - 2.1) / 1.4);           // fica mais fundo/escuro
@@ -480,6 +503,11 @@
   document.querySelectorAll('.card').forEach(c => io.observe(c));
   // idioma: abre sempre em inglês; EN/PT trocam os textos marcados com data-i18n
   const PT = {
+ "about-kick": "Sobre mim",
+ "about-h1": "Desenvolvedor Full Stack",
+ "about-h2": "em formação.",
+ "about-sub": "Criando produtos originais de ponta a ponta.",
+ "about-text": "Sou estudante de <b>Engenharia de Software na UniRV</b> e já sou formado como <b>Designer Gráfico</b>. Estou construindo minha trajetória como <b>Full Stack Developer</b>, desenvolvendo aplicações que unem <b>interfaces intuitivas</b>, lógica de programação e <b>soluções escaláveis</b>. Gosto de transformar ideias em <b>produtos digitais modernos</b>, combinando tecnologia, design (principalmente) e uma experiência de usuário bem planejada.",
  "kicker": "Portfólio",
  "roles": "Engenheiro de Software<br>Designer Gráfico",
  "dive": "Mergulhe nos meus projetos",
@@ -528,12 +556,33 @@
     };
     el._raf = requestAnimationFrame(step);
   }
+  // efeito binário para textos com formatação (negrito): monta o HTML final e anima cada trecho de texto,
+  // com os dígitos em verde (como nos títulos), sem quebrar as tags
+  function scrambleRich(el, html) {
+    cancelAnimationFrame(el._raf); el.innerHTML = html;
+    const parts = [], walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), list = [];
+    while (walk.nextNode()) list.push(walk.currentNode);
+    for (const n of list) { const sp = document.createElement('span'); n.replaceWith(sp); parts.push({ sp, t: n.nodeValue }); }
+    const esc = c => c === '<' ? '&lt;' : c === '>' ? '&gt;' : c === '&' ? '&amp;' : c;
+    const total = parts.reduce((a, o) => a + o.t.length, 0) || 1, start = performance.now(), dur = 1400;
+    const step = now => {
+      const p = Math.min(1, (now - start) / dur); let k = 0;
+      for (const o of parts) {
+        let out = '';
+        for (const ch of o.t) { out += (ch === ' ' || p >= .2 + .75 * (k / total)) ? esc(ch) : `<span class="bin">${Math.random() < .5 ? 0 : 1}</span>`; k++; }
+        o.sp.innerHTML = out;
+      }
+      if (p < 1) el._raf = requestAnimationFrame(step); else el.innerHTML = html;
+    };
+    el._raf = requestAnimationFrame(step);
+  }
   let langReady = false;
   function setLang(l) {
     document.documentElement.lang = l === 'pt' ? 'pt-BR' : 'en';
     i18n.forEach(el => {
       const t = l === 'pt' ? PT[el.dataset.i18n] : undefined, html = t ?? el.dataset.en;
       if ((el.dataset.i18n === 'roles' || el.dataset.i18n === 'kicker') && langReady && !reduce && html !== el.innerHTML) scramble(el, html);
+      else if (el.dataset.i18n.startsWith('about') && langReady && !reduce && html !== el.innerHTML) scrambleRich(el, html);
       else el.innerHTML = html;
     });
     langReady = true;
