@@ -56,6 +56,14 @@
     .about{left:6vw;right:6vw;width:auto;top:92vh}
     .about-text{font-size:11px}
   }
+  /* botão de baixar currículo, abaixo dos títulos */
+  .cv-btn{display:inline-flex;align-items:center;gap:10px;margin-top:18px;padding:10px 16px;border:2px solid #fff;color:#fff;text-decoration:none;
+    font:13px 'Silkscreen',monospace;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.04);
+    box-shadow:4px 4px 0 #2e302d;transition:transform .15s,box-shadow .15s,background .15s;position:relative;z-index:4}
+  .cv-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #2e302d;background:rgba(255,255,255,.1)}
+  .cv-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #2e302d}
+  .cv-ico{font-family:'Poppins Local',sans-serif;font-size:15px;line-height:1}
+  @media (max-width:760px){ .cv-btn{font-size:11px;padding:8px 12px;margin-top:12px} }
   .hero > .kicker,.hero > h1,.hero > p{font-family:'Silkscreen',monospace;color:#fff;text-transform:uppercase;text-shadow:.12em .12em 0 #2e302d}
   .hero > .kicker{font-size:16px;letter-spacing:.12em}
   .hero > h1{font-size:clamp(34px,6.5vw,80px);line-height:1;margin-top:10px;font-weight:400;letter-spacing:.04em}
@@ -160,6 +168,7 @@
     <div class="kicker" data-i18n="kicker">Portfolio</div>
     <h1>João Henrique</h1>
     <p data-i18n="roles">Software Engineer<br>Graphic Designer</p>
+    <a class="cv-btn" href="joaohpf_curriculo.pdf" download="joaohpf_curriculo.pdf"><span class="cv-ico" aria-hidden="true">&#8595;</span><span data-i18n="cv">Download résumé</span></a>
     <div class="about">
       <div class="about-kick" data-i18n="about-kick">About me</div>
       <h2 class="about-h"><span data-i18n="about-h1">Full Stack Developer</span><span class="dim" data-i18n="about-h2">in training.</span></h2>
@@ -503,6 +512,7 @@
   document.querySelectorAll('.card').forEach(c => io.observe(c));
   // idioma: abre sempre em inglês; EN/PT trocam os textos marcados com data-i18n
   const PT = {
+ "cv": "Baixar currículo",
  "repo-link": "Ver repositório no GitHub",
  "about-kick": "Sobre mim",
  "about-h1": "Desenvolvedor Full Stack",
