@@ -76,50 +76,53 @@
   .dive h2{font-size:clamp(30px,5.5vw,64px);text-align:center;line-height:1.05;text-shadow:0 4px 30px rgba(0,0,0,.4)}
   .dive h2 small{display:block;font-size:.35em;font-weight:400;color:#c9f3ec;margin-top:12px;letter-spacing:.05em}
 
-  .projects{padding:4vh 3vw 10vh;max-width:none;margin:0}
-  .projects h3{font-size:clamp(26px,3.5vw,40px);margin-bottom:28px}
-  /* cards em zigue-zague: um à esquerda, o próximo mais abaixo à direita, e assim por diante */
-  .grid{display:flex;flex-direction:column;gap:12vh}
-  .grid .card{width:min(380px,82vw)}
-  .grid .card:nth-child(odd){align-self:flex-start}
-  .grid .card:nth-child(even){align-self:flex-end}
-  /* projeto em card: imagem em cima, faixa escura embaixo com nome e descrição (estilo do exemplo) */
-  @font-face{font-family:'Poppins Local';src:url('fonts/poppins-400.woff2') format('woff2');font-weight:400;font-display:swap}
-  @font-face{font-family:'Poppins Local';src:url('fonts/poppins-600.woff2') format('woff2');font-weight:600;font-display:swap}
-  .grid .card.proj{width:min(560px,100%);display:block;background:#1b1b1d;border:0;border-radius:10px;overflow:hidden;
-    backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:0 18px 40px rgba(0,0,0,.4);font-family:'Poppins Local',sans-serif}
-  .proj .thumb{border-radius:0;font-size:40px}
-  .proj .info{padding:24px 30px 28px;text-align:left}
-  .proj .kick,.proj .tags{display:none}
-  .proj h4{font-size:clamp(20px,1.9vw,26px);font-weight:600;letter-spacing:.03em;margin:0 0 10px;color:#fff}
-  .proj h4 a{color:inherit;text-decoration:none}
-  .proj .desc{margin:0;font-size:15px;line-height:1.55;color:#c9ccd1;letter-spacing:.01em}
-  .proj .desc .more{display:inline-block;margin-top:8px;color:#8fc1ff;text-decoration:none}
-  .proj .repo{display:inline-flex;align-items:center;gap:8px;margin-top:16px;padding:8px 14px;border-radius:999px;
-    border:1px solid rgba(255,255,255,.22);color:#fff;font:500 13px 'Poppins Local',sans-serif;text-decoration:none;transition:background .2s}
-  .proj .repo:hover{background:rgba(255,255,255,.1)}
-  .thumb.has-img{position:relative;overflow:hidden;background:#eef1f5}
-  .thumb.has-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:top center;opacity:0;transition:opacity .35s}
-  .thumb.has-img img.on{opacity:1}
-  .thumb .next,.thumb .prev{position:absolute;top:50%;transform:translateY(-50%);z-index:2;width:34px;height:34px;border:0;border-radius:50%;
-    background:rgba(10,20,40,.7);color:#fff;font:600 17px 'Poppins Local',sans-serif;cursor:pointer}
-  .thumb .next{right:10px}
-  .thumb .prev{left:10px}
+  /* ---------- projetos: "avistamentos" ao longo de uma linha de mergulho ----------
+     Cada projeto fica numa profundidade. Longe do foco, a imagem aparece como a água do site: em blocos grandes de pixel,
+     azulada e ondulando; conforme chega à altura do personagem, os pixels diminuem até a imagem ficar nítida. */
+  .projects{position:relative;padding:8vh 0 18vh}
+  .diveline{position:absolute;left:50%;top:0;bottom:0;width:2px;margin-left:-1px;
+    background:repeating-linear-gradient(to bottom,rgba(255,255,255,.3) 0 6px,transparent 6px 14px)}
+  .grid{display:flex;flex-direction:column;gap:24vh}
+  .find{--gap:clamp(64px,8.5vw,170px);--f:1;position:relative;display:grid;grid-template-columns:1fr 1fr;column-gap:calc(var(--gap) * 2);padding:0 5vw}
+  .find-body{grid-column:1;justify-self:end;width:min(100%,clamp(420px,31vw,620px))}
+  .find:nth-child(even) .find-body{grid-column:2;justify-self:start}
+  .find canvas{display:block;width:100%;aspect-ratio:var(--ar,1.6);image-rendering:pixelated;
+    clip-path:polygon(0 16px,8px 16px,8px 8px,16px 8px,16px 0,calc(100% - 16px) 0,calc(100% - 16px) 8px,calc(100% - 8px) 8px,calc(100% - 8px) 16px,100% 16px,
+      100% calc(100% - 16px),calc(100% - 8px) calc(100% - 16px),calc(100% - 8px) calc(100% - 8px),calc(100% - 16px) calc(100% - 8px),calc(100% - 16px) 100%,
+      16px 100%,16px calc(100% - 8px),8px calc(100% - 8px),8px calc(100% - 16px),0 calc(100% - 16px))}
+  /* marca de profundidade: traço da linha central até o projeto, com a profundidade do outro lado da linha */
+  .mark{position:absolute;top:120px;right:50%;width:var(--gap);height:2px;
+    background:repeating-linear-gradient(to right,rgba(255,255,255,.3) 0 6px,transparent 6px 14px)}
+  .find:nth-child(even) .mark{right:auto;left:50%}
+  .mark .node{position:absolute;right:-5px;top:-4px;width:10px;height:10px;background:#0f3566;border:2px solid rgba(255,255,255,.55);transition:background .3s,border-color .3s}
+  .find:nth-child(even) .mark .node{right:auto;left:-5px}
+  .find.near .mark .node{background:#4fc3f7;border-color:#fff}
+  .mark .depth{position:absolute;left:calc(100% + 18px);top:-9px;white-space:nowrap;font:13px 'Silkscreen',monospace;color:rgba(255,255,255,.55);transition:color .3s}
+  .find:nth-child(even) .mark .depth{left:auto;right:calc(100% + 18px)}
+  .find.near .mark .depth{color:#fff}
+  .find-nav{display:flex;align-items:center;gap:10px;margin-top:12px;font:11px 'Silkscreen',monospace;color:#a9cbf0}
+  .find-nav button{width:30px;height:30px;padding:0;background:none;border:2px solid rgba(255,255,255,.5);color:#fff;font:13px 'Silkscreen',monospace;cursor:pointer}
+  .find-nav button:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+  .find-info{opacity:calc(.45 + .55 * var(--f))}
+  .find-info h3{margin-top:22px;font:400 clamp(20px,2.3vw,30px)/1.15 'Silkscreen',monospace;letter-spacing:.03em;text-shadow:.12em .12em 0 rgba(4,14,34,.6)}
+  .find-info h3 a{color:#fff;text-decoration:none}
+  .find-info .desc{margin-top:12px;max-width:46ch;font:15px/1.6 'Space Grotesk Local','Space Grotesk',sans-serif;color:#cfe0f3}
+  .find-info .stack{margin-top:10px;font:13px/1.5 'Space Grotesk Local','Space Grotesk',sans-serif;color:#8fbcec}
+  .find-info .links{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:16px}
+  .find-info .links a{padding-bottom:4px;border-bottom:2px solid #4fc3f7;color:#fff;text-decoration:none;font:12px 'Silkscreen',monospace;letter-spacing:.04em}
+  .find-info .links a:hover{border-bottom-color:#fff}
+  .find a:focus-visible,.find-nav button:focus-visible{outline:2px solid #fff;outline-offset:4px}
   @media (max-width:760px){
-    .proj .info{padding:18px 20px 22px}
-    .proj .desc{font-size:14px}
+    .projects{padding:6vh 0 14vh}
+    .diveline{left:18px}
+    .grid{gap:16vh}
+    .find{display:block;padding:0 5vw 0 44px}
+    .find-body,.find:nth-child(even) .find-body{width:100%;padding-top:34px}
+    .mark,.find:nth-child(even) .mark{top:10px;left:18px;right:auto;width:20px}
+    .mark .node,.find:nth-child(even) .mark .node{left:-5px;right:auto}
+    .mark .depth,.find:nth-child(even) .mark .depth{left:calc(100% + 8px);right:auto}
+    .find-info .desc{font-size:14px}
   }
-  .card{background:rgba(8,40,56,.55);border:1px solid rgba(160,240,230,.22);border-radius:18px;overflow:hidden;
-        backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
-        opacity:0;translate:0 80px;transition:opacity .9s ease,translate 1.2s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--i)*120ms)}
-  .card.in{opacity:1;translate:0 0}
-  @keyframes bob{0%,100%{transform:translateY(0) rotate(-.5deg)}50%{transform:translateY(-9px) rotate(.5deg)}}
-  .thumb{aspect-ratio:16/10;display:grid;place-items:center;font-size:44px;font-weight:700;color:rgba(255,255,255,.9)}
-  .card .txt{padding:16px 18px 20px}
-  .card h4{font-size:19px}
-  .card p{font-size:14.5px;color:#c3d6df;margin-top:6px;line-height:1.45}
-  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-  .tags span{font-size:11.5px;padding:4px 9px;border-radius:999px;background:rgba(124,243,255,.12);color:#9ff5e6}
 
   .contact{padding:6vh 6vw 14vh;text-align:center}
   .contact h3{font-size:clamp(24px,3vw,34px)}
@@ -133,7 +136,6 @@
   .contact .social a:hover img{opacity:1;transform:translateY(-2px)}
 
   @media (prefers-reduced-motion: reduce){
-    .card,.card.in{transition:opacity .4s;translate:0 0;animation:none}
     .ray,.hint span{animation:none}
   }
 </style>
@@ -182,30 +184,79 @@
   </section>
 
   <section class="projects">
+    <div class="diveline" aria-hidden="true"></div>
     <div class="grid">
-      <article class="card proj" style="--i:0">
-        <div class="thumb has-img"><img src="img/p/serv-1.webp" alt="SeRV — login screen" class="on" loading="lazy"><img src="img/p/serv-2.webp" alt="SeRV — student home" loading="lazy"><img src="img/p/serv-3.webp" alt="SeRV — school calendar" loading="lazy"><img src="img/p/serv-4.webp" alt="SeRV — grades" loading="lazy"><img src="img/p/serv-5.webp" alt="SeRV — quiz and leaderboard" loading="lazy"><img src="img/p/serv-6.webp" alt="SeRV — digital library" loading="lazy"><button class="next" type="button" aria-label="Próxima imagem">&gt;</button></div>
-        <div class="info"><span class="kick" data-i18n="c0-kick">1st Place Project</span><h4><a href="https://www.unirv.edu.br/ver_noticias.php?codabr=20269" data-i18n="c0-title">SeRV</a></h4><p class="desc" data-i18n="c0-desc">School management dashboard for Rio Verde's municipal schools. Won 1st place at UniRV's "Do Código ao Mercado" competition. <a class="more" href="https://www.unirv.edu.br/ver_noticias.php?codabr=20269">Read the news &rarr;</a></p><div class="tags" data-i18n="c0-tags"><span>1st place</span><span>HTML/CSS/JS</span><span>EdTech</span></div><a class="repo" href="https://github.com/joaohpf/project-serv"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" style="--ar:1.6" data-shots='[["img/p/serv-1.webp", "SeRV, login screen"], ["img/p/serv-2.webp", "SeRV, student home"], ["img/p/serv-3.webp", "SeRV, school calendar"], ["img/p/serv-4.webp", "SeRV, grades"], ["img/p/serv-5.webp", "SeRV, quiz and leaderboard"], ["img/p/serv-6.webp", "SeRV, digital library"]]'>
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="SeRV, login screen"></canvas><div class="find-nav"><button class="prev" type="button" aria-label="Previous image">&lt;</button><span class="count" aria-live="polite">1/6</span><button class="next" type="button" aria-label="Next image">&gt;</button></div>
+          <div class="find-info">
+            <h3><a href="https://github.com/joaohpf/project-serv" data-i18n="c0-title">SeRV</a></h3>
+            <p class="desc" data-i18n="c0-desc">School management dashboard for Rio Verde's municipal schools. Won 1st place at UniRV's "Do Código ao Mercado" competition.</p>
+            <p class="stack" data-i18n="c0-tags">HTML, CSS and JavaScript</p>
+            <p class="links"><a href="https://github.com/joaohpf/project-serv" data-i18n="repo-link">Repository on GitHub</a><a href="https://www.unirv.edu.br/ver_noticias.php?codabr=20269" data-i18n="news-link">Read the news</a></p>
+          </div>
+        </div>
       </article>
-      <article class="card proj" style="--i:1">
-        <div class="thumb has-img"><img src="img/p/sistac-1.webp" alt="SISTAC — student portal" class="on" loading="lazy"></div>
-        <div class="info"><span class="kick" data-i18n="c1-kick">Team Project</span><h4><a href="https://github.com/Tizoyas/gc-atividade-24-08" data-i18n="c1-title">SISTAC</a></h4><p class="desc" data-i18n="c1-desc">Academic system built by a 13-person team for the Software Configuration Management course, practicing branches, code review, tagged releases, CI and configuration item control on GitHub.</p><div class="tags" data-i18n="c1-tags"><span>Teamwork</span><span>Node.js</span><span>Git &amp; CI</span></div><a class="repo" href="https://github.com/Tizoyas/gc-atividade-24-08"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" style="--ar:1.896" data-shots='[["img/p/sistac-1.webp", "SISTAC, student portal"]]'>
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="SISTAC, student portal"></canvas>
+          <div class="find-info">
+            <h3><a href="https://github.com/Tizoyas/gc-atividade-24-08" data-i18n="c1-title">SISTAC</a></h3>
+            <p class="desc" data-i18n="c1-desc">Academic system built by a 13-person team for the Software Configuration Management course, practicing branches, code review, tagged releases, CI and configuration item control on GitHub.</p>
+            <p class="stack" data-i18n="c1-tags">Node.js, Git and CI</p>
+            <p class="links"><a href="https://github.com/Tizoyas/gc-atividade-24-08" data-i18n="repo-link">Repository on GitHub</a></p>
+          </div>
+        </div>
       </article>
-      <article class="card proj" style="--i:2">
-        <div class="thumb" style="background:linear-gradient(135deg,#d9822b,#5a2e12)">BM</div>
-        <div class="info"><span class="kick" data-i18n="c2-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/bakery-manager" data-i18n="c2-title">BakeryManager</a></h4><p class="desc" data-i18n="c2-desc">Bakery management system with a REST API: products, ingredients, categories, recipes and technical sheets, plus a simple web interface.</p><div class="tags" data-i18n="c2-tags"><span>Java</span><span>Spring Boot</span><span>PostgreSQL</span></div><a class="repo" href="https://github.com/joaohpf/bakery-manager"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" data-tile="BM|#d9822b|#5a2e12">
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="BakeryManager"></canvas>
+          <div class="find-info">
+            <h3><a href="https://github.com/joaohpf/bakery-manager" data-i18n="c2-title">BakeryManager</a></h3>
+            <p class="desc" data-i18n="c2-desc">Bakery management system with a REST API: products, ingredients, categories, recipes and technical sheets, plus a simple web interface.</p>
+            <p class="stack" data-i18n="c2-tags">Java, Spring Boot and PostgreSQL</p>
+            <p class="links"><a href="https://github.com/joaohpf/bakery-manager" data-i18n="repo-link">Repository on GitHub</a></p>
+          </div>
+        </div>
       </article>
-      <article class="card proj" style="--i:0">
-        <div class="thumb" style="background:linear-gradient(135deg,#3a4bd7,#13204f)">VE</div>
-        <div class="info"><span class="kick" data-i18n="c3-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/editor-vetorial" data-i18n="c3-title">Vector Drawing Editor</a></h4><p class="desc" data-i18n="c3-desc">Interactive 2D shape editor that applies GoF design patterns (State, Prototype, Command/Memento, Composite) on an MVC architecture.</p><div class="tags" data-i18n="c3-tags"><span>Java</span><span>JavaFX</span><span>Design Patterns</span></div><a class="repo" href="https://github.com/joaohpf/editor-vetorial"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" data-tile="VE|#3a4bd7|#13204f">
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="Vector Drawing Editor"></canvas>
+          <div class="find-info">
+            <h3><a href="https://github.com/joaohpf/editor-vetorial" data-i18n="c3-title">Vector Drawing Editor</a></h3>
+            <p class="desc" data-i18n="c3-desc">Interactive 2D shape editor that applies GoF design patterns (State, Prototype, Command/Memento, Composite) on an MVC architecture.</p>
+            <p class="stack" data-i18n="c3-tags">Java and JavaFX, with design patterns</p>
+            <p class="links"><a href="https://github.com/joaohpf/editor-vetorial" data-i18n="repo-link">Repository on GitHub</a></p>
+          </div>
+        </div>
       </article>
-      <article class="card proj" style="--i:1">
-        <div class="thumb has-img"><img src="img/p/garage-1.webp" alt="Vehicle Garage — bookings dashboard" class="on" loading="lazy"><img src="img/p/garage-2.webp" alt="Vehicle Garage — date conflict error" loading="lazy"><button class="next" type="button" aria-label="Próxima imagem">&gt;</button></div>
-        <div class="info"><span class="kick" data-i18n="c4-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/vehicle-garage" data-i18n="c4-title">Vehicle Garage</a></h4><p class="desc" data-i18n="c4-desc">Booking system for people and vehicles with availability checks, date-conflict validation and JSON persistence, built around SOLID principles.</p><div class="tags" data-i18n="c4-tags"><span>Java</span><span>Spring Boot</span><span>Thymeleaf</span></div><a class="repo" href="https://github.com/joaohpf/vehicle-garage"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" style="--ar:2.013" data-shots='[["img/p/garage-1.webp", "Vehicle Garage, bookings dashboard"], ["img/p/garage-2.webp", "Vehicle Garage, date conflict error"]]'>
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="Vehicle Garage, bookings dashboard"></canvas><div class="find-nav"><button class="prev" type="button" aria-label="Previous image">&lt;</button><span class="count" aria-live="polite">1/2</span><button class="next" type="button" aria-label="Next image">&gt;</button></div>
+          <div class="find-info">
+            <h3><a href="https://github.com/joaohpf/vehicle-garage" data-i18n="c4-title">Vehicle Garage</a></h3>
+            <p class="desc" data-i18n="c4-desc">Booking system for people and vehicles with availability checks, date-conflict validation and JSON persistence, built around SOLID principles.</p>
+            <p class="stack" data-i18n="c4-tags">Java, Spring Boot and Thymeleaf</p>
+            <p class="links"><a href="https://github.com/joaohpf/vehicle-garage" data-i18n="repo-link">Repository on GitHub</a></p>
+          </div>
+        </div>
       </article>
-      <article class="card proj" style="--i:2">
-        <div class="thumb has-img"><img src="img/p/labreserva-1.webp" alt="LabReserva — pending requests" class="on" loading="lazy"><img src="img/p/labreserva-2.webp" alt="LabReserva — resolving a conflict" loading="lazy"><img src="img/p/labreserva-3.webp" alt="LabReserva — lab search (mobile)" loading="lazy"><img src="img/p/labreserva-4.webp" alt="LabReserva — free time slots (mobile)" loading="lazy"><button class="prev" type="button" aria-label="Imagem anterior">&lt;</button></div>
-        <div class="info"><span class="kick" data-i18n="c5-kick">Featured Project</span><h4><a href="https://github.com/joaohpf/labreserva-prototype" data-i18n="c5-title">LabReserva</a></h4><p class="desc" data-i18n="c5-desc">Clickable mid-fidelity prototype of a lab booking and equipment loan system, with flows for professors, students and technicians.</p><div class="tags" data-i18n="c5-tags"><span>Penpot</span><span>HCI</span><span>Prototype</span></div><a class="repo" href="https://github.com/joaohpf/labreserva-prototype"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span data-i18n="repo-link">View repository on GitHub</span> ↗</a></div>
+      <article class="proj find" style="--ar:1.778" data-shots='[["img/p/labreserva-1.webp", "LabReserva, pending requests"], ["img/p/labreserva-2.webp", "LabReserva, resolving a conflict"], ["img/p/labreserva-3.webp|img/p/labreserva-4.webp", "LabReserva on mobile, lab search and free time slots"]]'>
+        <div class="mark" aria-hidden="true"><i class="node"></i><span class="depth"></span></div>
+        <div class="find-body">
+          <canvas role="img" aria-label="LabReserva, pending requests"></canvas><div class="find-nav"><button class="prev" type="button" aria-label="Previous image">&lt;</button><span class="count" aria-live="polite">1/3</span><button class="next" type="button" aria-label="Next image">&gt;</button></div>
+          <div class="find-info">
+            <h3><a href="https://github.com/joaohpf/labreserva-prototype" data-i18n="c5-title">LabReserva</a></h3>
+            <p class="desc" data-i18n="c5-desc">Clickable mid-fidelity prototype of a lab booking and equipment loan system, with flows for professors, students and technicians.</p>
+            <p class="stack" data-i18n="c5-tags">Designed in Penpot</p>
+            <p class="links"><a href="https://github.com/joaohpf/labreserva-prototype" data-i18n="repo-link">Repository on GitHub</a></p>
+          </div>
+        </div>
       </article>
     </div>
   </section>
@@ -501,19 +552,112 @@
     }
 
     drawFx(level, depth, t);
+    if (typeof updateFinds === 'function') updateFinds(now);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 
-  // cards sobem boiando quando entram na tela
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-  }), { threshold: .2 });
-  document.querySelectorAll('.card').forEach(c => io.observe(c));
+  // ---------- projetos "avistados" na água ----------
+  const STEPS = [1, 2, 3, 4, 6, 8, 12, 16, 24];   // tamanhos de pixel, do nítido ao mais distante
+  const finds = [...document.querySelectorAll('.find')].map((el, n) => {
+    const cv = el.querySelector('canvas');
+    return { el, cv, ctx: cv.getContext('2d'), shots: JSON.parse(el.dataset.shots || '[]'), tile: el.dataset.tile, imgs: [], idx: 0,
+             step: -1, dirty: true, swapAt: -1e9, lastDraw: 0, seed: n * 1.7, small: document.createElement('canvas'),
+             count: el.querySelector('.count'), depthEl: el.querySelector('.depth') };
+  });
+  function loadShot(it, i) {
+    if (it.imgs[i]) return;
+    if (it.tile) {   // projeto sem captura de tela: bloco de cor com as iniciais, desenhado no mesmo sistema
+      const [txt, c1, c2] = it.tile.split('|'), c = document.createElement('canvas'), B = 50; c.width = 800; c.height = 500;
+      const x = c.getContext('2d'); x.fillStyle = c1; x.fillRect(0, 0, 800, 500);
+      x.fillStyle = c2; for (let r = 0; r < 10; r++) x.fillRect((17 - r * 1.4 | 0) * B, r * B, 800, B);   // corte em escada, como os cantos
+      x.fillStyle = '#fff'; x.font = "150px 'Silkscreen', monospace"; x.textAlign = 'left'; x.textBaseline = 'alphabetic'; x.fillText(txt, 60, 440);
+      it.imgs[i] = c; it.dirty = true; return;
+    }
+    if (!it.shots[i]) return;
+    const srcs = it.shots[i][0].split('|');
+    if (srcs.length > 1) {   // duas telas em pé lado a lado
+      const c = document.createElement('canvas'); c.width = 0; it.imgs[i] = c; let left = srcs.length;
+      const parts = srcs.map(u => { const im = new Image(); im.onload = () => { if (--left) return;
+        const g = Math.round(parts[0].naturalWidth * .22), hh = parts[0].naturalHeight; c.width = parts.reduce((a, q) => a + q.naturalWidth, 0) + g * (parts.length - 1); c.height = hh;
+        const x = c.getContext('2d'); let px = 0; for (const q of parts) { x.drawImage(q, px, 0); px += q.naturalWidth + g; } it.dirty = true; }; im.src = u; return im; });
+      return;
+    }
+    const im = new Image(); im.onload = () => { it.dirty = true; }; im.src = it.shots[i][0]; it.imgs[i] = im;
+  }
+  function sizeFinds() {
+    const dpr = Math.min(devicePixelRatio || 1, 1.5), y0 = document.querySelector('.projects').getBoundingClientRect().top + scrollY - H * .6;
+    for (const it of finds) {
+      const w = Math.round(it.cv.clientWidth * dpr);
+      const h = Math.round(it.cv.clientHeight * dpr);
+      if (w && (it.cv.width !== w || it.cv.height !== h)) { it.cv.width = w; it.cv.height = h; it.dirty = true; }
+      // profundidade calculada pela posição real na página: 1 m a cada 95 px
+      const d = Math.max(1, Math.round((it.el.getBoundingClientRect().top + scrollY + 120 - y0) / 95));
+      it.depthEl.textContent = '−' + d + ' m';
+    }
+  }
+  function drawFind(it, f, now) {
+    const { cv, ctx: x, small } = it, w = cv.width, h = cv.height, src = it.imgs[it.idx];
+    const sw0 = src && (src.naturalWidth || src.width), sh0 = src && (src.naturalHeight || src.height);
+    if (!sw0 || src.complete === false) { x.globalCompositeOperation = 'source-over'; x.fillStyle = '#123a6b'; x.fillRect(0, 0, w, h); return; }
+    // recorte: preenche o quadro quando a proporção é parecida; telas mais estreitas aparecem inteiras, centralizadas
+    let sx = 0, sW = sw0, sH = sh0, dx = 0, dW = w;
+    if (sw0 / sh0 >= w / h * .97) { sW = Math.min(sw0, sh0 * w / h); sx = (sw0 - sW) / 2; }
+    else if (sw0 / sh0 >= w / h * .8) sH = sw0 * h / w;
+    else { dW = h * sw0 / sh0; dx = (w - dW) / 2; }
+    const px = STEPS[it.step] * Math.max(1, Math.round(w / 520));
+    x.globalCompositeOperation = 'source-over'; x.clearRect(0, 0, w, h);
+    if (it.step === 0) { x.imageSmoothingEnabled = true; x.drawImage(src, sx, 0, sW, sH, dx, 0, dW, h); return; }
+    const cw = Math.ceil(w / px), ch = Math.ceil(h / px), sc = small.getContext('2d');
+    if (small.width !== cw || small.height !== ch) { small.width = cw; small.height = ch; }
+    sc.clearRect(0, 0, cw, ch);
+    sc.imageSmoothingEnabled = true; sc.drawImage(src, sx, 0, sW, sH, dx / px, 0, dW / px, ch);
+    x.imageSmoothingEnabled = false;
+    const amp = (1 - f) * 3;   // refração: cada linha de pixels desliza um pouco, como algo visto através da água
+    for (let r = 0; r < ch; r++) {
+      const off = Math.round(Math.sin(r * .55 + now * .0016 + it.seed) * amp) * px;
+      x.drawImage(small, 0, r, cw, 1, off, r * px, cw * px, px);
+    }
+    x.globalCompositeOperation = 'source-atop';   // o azul da água só por cima da imagem
+    x.fillStyle = `rgba(16,58,112,${(.62 * (1 - f)).toFixed(3)})`; x.fillRect(0, 0, w, h);
+  }
+  function updateFinds(now) {
+    for (const it of finds) {
+      const r = it.cv.getBoundingClientRect();
+      if (r.bottom < -H * .6 || r.top > H * 1.6) continue;
+      if (!it.imgs[it.idx]) loadShot(it, it.idx);
+      if (r.bottom < -40 || r.top > H + 40) continue;
+      // foco: nítido quando o projeto está na altura do personagem (meio da tela); turvo perto das bordas
+      const d = Math.abs(r.top + r.height / 2 - H / 2) / H;
+      let f = reduce ? 1 : 1 - smooth(clamp((d - .12) / .42));
+      f = Math.min(f, reduce ? 1 : clamp((now - it.swapAt) / 420));   // ao trocar de imagem, ela "emerge" de novo
+      const step = Math.round((1 - f) * (STEPS.length - 1));
+      if (step !== it.step || it.dirty || (step > 0 && now - it.lastDraw > 50)) {
+        it.step = step; it.dirty = false; it.lastDraw = now; drawFind(it, f, now);
+        it.el.style.setProperty('--f', f.toFixed(2)); it.el.classList.toggle('near', f > .6);
+      }
+    }
+  }
+  finds.forEach(it => it.el.querySelectorAll('.find-nav button').forEach(btn => btn.addEventListener('click', () => {
+    const n = it.shots.length; it.idx = (it.idx + (btn.classList.contains('prev') ? -1 : 1) + n) % n;
+    loadShot(it, it.idx); loadShot(it, (it.idx + 1) % n);
+    it.swapAt = performance.now(); it.dirty = true;
+    it.count.textContent = (it.idx + 1) + '/' + n; it.cv.setAttribute('aria-label', it.shots[it.idx][1]);
+  })));
+  addEventListener('resize', sizeFinds); addEventListener('load', sizeFinds);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => finds.forEach(it => { if (it.tile) { it.imgs = []; it.dirty = true; } }));
+  sizeFinds();
   // idioma: abre sempre em inglês; EN/PT trocam os textos marcados com data-i18n
   const PT = {
  "cv": "Baixar currículo",
- "repo-link": "Ver repositório no GitHub",
+ "repo-link": "Repositório no GitHub",
+ "news-link": "Leia a notícia",
+ "c0-tags": "HTML, CSS e JavaScript",
+ "c1-tags": "Node.js, Git e CI",
+ "c2-tags": "Java, Spring Boot e PostgreSQL",
+ "c3-tags": "Java e JavaFX, com padrões de projeto",
+ "c4-tags": "Java, Spring Boot e Thymeleaf",
+ "c5-tags": "Desenhado no Penpot",
  "about-kick": "Sobre mim",
  "about-h1": "Desenvolvedor Full Stack",
  "about-h2": "em formação.",
@@ -524,24 +668,14 @@
  "dive": "Mergulhe nos meus projetos",
  "contact-title": "Fale comigo",
  "contact-text": "<span class=\"ln\">Estou buscando entrar em uma equipe multidisciplinar que valorize melhorar a vida das</span><span class=\"ln\">pessoas através do design acessível.</span><span class=\"ln\">Tem um projeto em mente? Vamos conversar.</span>",
- "c0-kick": "Projeto 1º lugar",
- "c0-desc": "Painel de gestão escolar para as escolas municipais de Rio Verde. Ficou em 1º lugar na competição \"Do Código ao Mercado\" da UniRV. <a class=\"more\" href=\"https://www.unirv.edu.br/ver_noticias.php?codabr=20269\">Leia a notícia &rarr;</a>",
- "c0-tags": "<span>1º lugar</span><span>HTML/CSS/JS</span><span>EdTech</span>",
- "c1-kick": "Projeto em equipe",
+ "c0-desc": "Painel de gestão escolar para as escolas municipais de Rio Verde. Ficou em 1º lugar na competição \"Do Código ao Mercado\" da UniRV.",
  "c1-desc": "Sistema acadêmico feito por uma equipe de 13 pessoas na disciplina de Gerência de Configuração de Software, praticando branches, revisão de código, versões com tag, CI e controle de itens de configuração no GitHub.",
- "c1-tags": "<span>Trabalho em equipe</span><span>Node.js</span><span>Git &amp; CI</span>",
- "c2-kick": "Projeto em destaque",
  "c2-desc": "Sistema de gestão de padaria com API REST: produtos, ingredientes, categorias, receitas e fichas técnicas, além de uma interface web simples.",
- "c3-kick": "Projeto em destaque",
  "c3-title": "Editor Vetorial",
  "c3-desc": "Editor interativo de formas 2D que aplica padrões de projeto GoF (State, Prototype, Command/Memento, Composite) em uma arquitetura MVC.",
- "c3-tags": "<span>Java</span><span>JavaFX</span><span>Padrões de projeto</span>",
- "c4-kick": "Projeto em destaque",
  "c4-title": "Garagem de Veículos",
  "c4-desc": "Sistema de reservas de pessoas e veículos com verificação de disponibilidade, validação de conflito de datas e persistência em JSON, seguindo os princípios SOLID.",
- "c5-kick": "Projeto em destaque",
  "c5-desc": "Protótipo clicável de média fidelidade de um sistema de reserva de laboratórios e empréstimo de equipamentos, com fluxos para professores, alunos e técnicos.",
- "c5-tags": "<span>Penpot</span><span>IHC</span><span>Protótipo</span>"
 };
   const i18n = [...document.querySelectorAll('[data-i18n]')];
   i18n.forEach(el => { el.dataset.en = el.innerHTML; });
@@ -600,16 +734,11 @@
     $('.lang').classList.toggle('pt', l === 'pt');
     document.querySelectorAll('.lang button').forEach(b => b.classList.toggle('on', b.dataset.lang === l));
     measure();
+    if (typeof sizeFinds === 'function') sizeFinds();
   }
   document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
   setLang('en');
 
-  // setas das imagens dos projetos (dão a volta no fim/início)
-  document.querySelectorAll('.thumb .next, .thumb .prev').forEach(btn => btn.addEventListener('click', () => {
-    const step = btn.classList.contains('prev') ? -1 : 1;   // "<" volta, ">" avança
-    const imgs = [...btn.parentElement.querySelectorAll('img')], i = imgs.findIndex(im => im.classList.contains('on'));
-    imgs[i].classList.remove('on'); imgs[(i + step + imgs.length) % imgs.length].classList.add('on');
-  }));
 })();
 </script>
 </body>
